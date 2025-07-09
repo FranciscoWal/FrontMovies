@@ -1,0 +1,20 @@
+.container {
+    max-width: 600px;
+  }
+  
+  .form-check {
+    margin-bottom: 10px;
+  }
+  
+  .invalid-feedback {
+    font-size: 0.875rem;
+  }
+  
+  img {
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  
+  .btn-primary {
+    margin-top: 20px;
+  }

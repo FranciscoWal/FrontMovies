@@ -1,0 +1,105 @@
+<div class="container" style="margin: 20px;">
+    <h2>Editar Película</h2>
+    <form [formGroup]="peliculaForm" (ngSubmit)="onSubmit()">
+      <!-- Nombre -->
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input
+          type="text"
+          class="form-control"
+          id="nombre"
+          formControlName="nombre"
+          [class.is-invalid]="peliculaForm.get('nombre')?.invalid && peliculaForm.get('nombre')?.touched"
+        />
+        <div *ngIf="peliculaForm.get('nombre')?.hasError('required') && peliculaForm.get('nombre')?.touched" class="invalid-feedback">
+          El nombre es obligatorio.
+        </div>
+      </div>
+  
+      <!-- Descripción -->
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Descripción</label>
+        <textarea
+          class="form-control"
+          id="descripcion"
+          formControlName="descripcion"
+          [class.is-invalid]="peliculaForm.get('descripcion')?.invalid && peliculaForm.get('descripcion')?.touched"
+        ></textarea>
+        <div *ngIf="peliculaForm.get('descripcion')?.hasError('required') && peliculaForm.get('descripcion')?.touched" class="invalid-feedback">
+          La descripción es obligatoria.
+        </div>
+      </div>
+  
+      <!-- Trailer Link -->
+      <div class="mb-3">
+        <label for="trailerLink" class="form-label">Enlace del Trailer (YouTube)</label>
+        <input
+          type="text"
+          class="form-control"
+          id="trailerLink"
+          formControlName="trailerLink"
+          [class.is-invalid]="peliculaForm.get('trailerLink')?.invalid && peliculaForm.get('trailerLink')?.touched"
+        />
+        <div *ngIf="peliculaForm.get('trailerLink')?.hasError('required') && peliculaForm.get('trailerLink')?.touched" class="invalid-feedback">
+          El enlace del trailer es obligatorio.
+        </div>
+        <div *ngIf="peliculaForm.get('trailerLink')?.hasError('invalidYoutubeUrl') && peliculaForm.get('trailerLink')?.touched" class="invalid-feedback">
+          Debe ser un enlace válido de YouTube.
+        </div>
+      </div>
+  
+      <!-- Poster -->
+      <div class="mb-3">
+        <label for="poster" class="form-label">Poster (Imagen)</label>
+        <input
+          type="file"
+          class="form-control"
+          id="poster"
+          accept="image/png,image/jpeg,image/gif"
+          (change)="onFileChange($event)"
+          [class.is-invalid]="peliculaForm.get('poster')?.invalid && peliculaForm.get('poster')?.touched"
+        />
+        <div *ngIf="peliculaForm.get('poster')?.hasError('required') && peliculaForm.get('poster')?.touched" class="invalid-feedback">
+          La imagen es obligatoria.
+        </div>
+        <div *ngIf="peliculaForm.get('poster')?.hasError('invalidBase64Image') && peliculaForm.get('poster')?.touched" class="invalid-feedback">
+          La imagen debe ser un archivo PNG, JPEG o GIF válido.
+        </div>
+        <!-- Vista previa de la imagen -->
+        <img
+          *ngIf="peliculaForm.get('poster')?.value"
+          [src]="peliculaForm.get('poster')?.value"
+          alt="Vista previa"
+          style="max-width: 200px; max-height: 300px; margin-top: 10px;"
+        />
+      </div>
+  
+      <!-- Géneros -->
+      <div class="mb-3">
+        <label class="form-label">Géneros</label>
+        <div
+          class="form-check"
+          *ngFor="let genero of generosDisponibles"
+        >
+          <input
+            type="checkbox"
+            class="form-check-input"
+            [id]="genero"
+            [value]="genero"
+            (change)="onGenreChange($event, genero)"
+            [checked]="peliculaForm.get('genero')?.value.includes(genero)"
+          />
+          <label class="form-check-label" [for]="genero">{{ genero }}</label>
+        </div>
+        <div *ngIf="peliculaForm.get('genero')?.hasError('required') && peliculaForm.get('genero')?.touched" class="invalid-feedback d-block">
+          Debe seleccionar al menos un género.
+        </div>
+        <div *ngIf="peliculaForm.get('genero')?.hasError('minGenres') && peliculaForm.get('genero')?.touched" class="invalid-feedback d-block">
+          Debe seleccionar al menos {{ peliculaForm.get('genero')?.getError('minGenres').required }} género(s).
+        </div>
+      </div>
+  
+      <!-- Botón de envío -->
+      <button type="submit" class="btn btn-primary" [disabled]="peliculaForm.invalid">Editar Película</button>
+    </form>
+  </div>

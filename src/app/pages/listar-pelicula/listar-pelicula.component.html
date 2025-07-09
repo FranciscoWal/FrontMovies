@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Noche de Películas</title>
+</head>
+<body>
+
+  <!-- MENÚ -->
+  <header class="header">
+    <div class="logo-content">
+      <i class='bx bx-movie'></i>
+      <a href="./index.html" class="logo">Noche de Peliculas</a>
+    </div>
+
+    <nav class="navbar">
+      <a href="./index.html" style="--i:1">Peliculas</a>
+      <a href="./agregar.html" style="--i:2">Agregar Pelicula</a>
+      <a href="./editar.html" style="--i:3">Editar Pelicula</a>
+    </nav>
+
+    <div class="social-media">
+      <a href="#" style="--i:1"><i class='bx bx-search'></i></a>
+      <a href="#" style="--i:2"><i class='bx bx-message'></i></a>
+      <a href="#" style="--i:3"><i class='bx bx-user'></i></a>
+    </div>
+  </header>
+
+  <!-- LISTADO DINÁMICO DE PELÍCULAS -->
+  <div class="cards-container">
+    @if (peliculas.length <= 0) {
+      <p class="text-center">No hay películas registradas</p>
+    } @else {
+      @for (pelicula of peliculas; track pelicula._id; let i = $index) {
+        <div class="card">
+          <div class="card-inner">
+
+            <!-- PORTADA -->
+            <div class="card-front">
+              <img [src]="pelicula.poster" alt="Poster {{ pelicula.nombre }}">
+            </div>
+
+            <!-- INFORMACIÓN -->
+            <div class="card-back">
+              <h4>ID: {{ pelicula._id }}</h4>
+              <h3>{{ pelicula.nombre }}</h3>
+              <p>{{ pelicula.descripcion }}</p>
+              <p><strong>Género:</strong> {{ pelicula.genero }}</p>
+
+              <div class="iframe-container">
+                <iframe 
+                  width="560" 
+                  height="315" 
+                  [src]="sanitizeUrl(pelicula.trailerLink)" 
+                  title="YouTube video player" 
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerpolicy="strict-origin-when-cross-origin" 
+                  allowfullscreen>
+                </iframe>
+              </div>
+
+              <div class="card-buttons">
+                <button class="edit-btn" [routerLink]="['/editar-pelicula', pelicula._id]">
+                  <i class='bx bx-edit'></i>
+                </button>
+                <button class="delete-btn" (click)="eliminarPelicula(pelicula, i)">
+                  <i class='bx bx-trash'></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+</body>
+</html>
