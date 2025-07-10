@@ -7,13 +7,13 @@ import { Pelicula } from '../../models/pelicula.models';
 
 @Component({
   selector: 'app-editar-pelicula',
-  standalone: true, // Asumiendo que es un componente standalone
-  imports: [FormsModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './editar-pelicula.component.html',
   styleUrl: './editar-pelicula.component.css'
 })
 export class EditarPeliculaComponent implements OnInit {
-  peliculaForm: FormGroup = new FormGroup({});
+  peliculaForm: FormGroup;
   enviado: boolean = false;
   generosDisponibles: string[] = [
     'Acción',
@@ -27,7 +27,7 @@ export class EditarPeliculaComponent implements OnInit {
     'Documental',
     'Animación'
   ];
-  peliculaData: any = [];
+  peliculaData: Pelicula | null = null; // Corregido: Single Pelicula or null
 
   constructor(
     private formBuilder: FormBuilder,
@@ -35,38 +35,39 @@ export class EditarPeliculaComponent implements OnInit {
     private ngZone: NgZone,
     private peliculaService: PeliculasService,
     private actRoute: ActivatedRoute
-
   ) {
-    this.mainForm();
-  }
-  ngOnInit(): void {
-    this.mainForm();
-    let id = this.actRoute.snapshot.paramMap.get('id');
-    this.getPelicula(id)
-
-  }
-  mainForm() {
     this.peliculaForm = this.formBuilder.group({
       nombre: ['', [Validators.required]],
       descripcion: ['', [Validators.required]],
       trailerLink: ['', [Validators.required, this.youtubeUrlValidator()]],
       poster: ['', [Validators.required, this.base64ImageValidator()]],
-      genero: [[], [Validators.required, this.minGenresValidator(1)]] // Corregido: inicializado como arreglo
+      genero: [[], [Validators.required, this.minGenresValidator(1)]]
     });
+  }
+
+  ngOnInit(): void {
+    const id = this.actRoute.snapshot.paramMap.get('id');
+    if (id) {
+      this.getPelicula(id);
+    } else {
+      console.error('ID de película no proporcionado');
+      this.ngZone.run(() => this.router.navigateByUrl('/listar-pelicula'));
+    }
   }
 
   youtubeUrlValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const value = control.value;
-      if (!value) return null; // Validators.required se encarga del caso vacío
+      if (!value) return null; // Validators.required handles empty case
       const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[A-Za-z0-9_-]{11}(&.*)?$/;
       return youtubeRegex.test(value) ? null : { invalidYoutubeUrl: true };
     };
   }
+
   base64ImageValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const value = control.value;
-      if (!value) return null; // Validators.required se encarga del caso vacío
+      if (!value) return null; // Validators.required handles empty case
       const base64ImageRegex = /^data:image\/(png|jpeg|jpg|gif);base64,[A-Za-z0-9+/=]+$/;
       return base64ImageRegex.test(value) ? null : { invalidBase64Image: true };
     };
@@ -103,17 +104,15 @@ export class EditarPeliculaComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const currentGenres = this.peliculaForm.get('genero')?.value || [];
     if (input.checked) {
-      // Agregar género si está marcado
       this.peliculaForm.get('genero')?.setValue([...currentGenres, genero]);
     } else {
-      // Remover género si se desmarca
       this.peliculaForm.get('genero')?.setValue(currentGenres.filter((g: string) => g !== genero));
     }
     this.peliculaForm.get('genero')?.markAsTouched();
   }
 
-  //Método para buscar la pelicula y verlo en el formulario
-  getPelicula(id: any) {
+  // Método para buscar la película y cargar sus datos en el formulario
+  getPelicula(id: string) {
     this.peliculaService.optenerPeliculasPorID(id).subscribe({
       next: (data: Pelicula) => {
         this.peliculaData = data;
@@ -122,7 +121,7 @@ export class EditarPeliculaComponent implements OnInit {
           descripcion: data.descripcion,
           trailerLink: data.trailerLink,
           poster: data.poster,
-          genero: data.genero || [] // Asegura que genero sea un arreglo
+          genero: data.genero || []
         });
       },
       error: (e) => {
@@ -133,29 +132,34 @@ export class EditarPeliculaComponent implements OnInit {
     });
   }
 
+  // Método para enviar el formulario
   onSubmit() {
     this.enviado = true;
     if (!this.peliculaForm.valid) {
-      return false;
-    } else {
-      if (window.confirm('¿Estás seguro que lo deseas modificar?')) {
-        let id: any = this.actRoute.snapshot.paramMap.get('id')
-        this.peliculaService.actualizarPelicula(id, this.peliculaForm.value)
-          .subscribe({
-            complete: () => {
-              this.router.navigateByUrl('/listar-peliculas');
-              console.log('Se actualizo correctamente');
-            },
-            error: (e) => {
-              console.log(e);
-            }
-          })
-      }
+      this.peliculaForm.markAllAsTouched();
       return;
-      
-
     }
 
-  }
+    if (!window.confirm('¿Estás seguro de que deseas modificar?')) {
+      return;
+    }
 
+    const id = this.actRoute.snapshot.paramMap.get('id');
+    if (!id) {
+      console.error('ID de película no proporcionado');
+      alert('Error: No se proporcionó un ID válido.');
+      return;
+    }
+
+    this.peliculaService.actualizarPelicula(id, this.peliculaForm.value).subscribe({
+      next: () => {
+        console.log('Película actualizada correctamente');
+        this.ngZone.run(() => this.router.navigateByUrl('/listar-peliculas'));
+      },
+      error: (e) => {
+        console.error('Error al actualizar la película:', e);
+        alert('Error al actualizar la película. Por favor, intenta de nuevo.');
+      }
+    });
+  }
 }

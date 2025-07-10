@@ -123,7 +123,7 @@ export class AgregarPeliculaComponent implements OnInit {
     this.peliculaService.agregarPelicula(this.peliculaForm.value).subscribe({
       next: () => {
         console.log('Película agregada correctamente');
-        this.ngZone.run(() => this.router.navigateByUrl('/listar-pelicula')); // Corregido: ruta consistente
+        this.ngZone.run(() => this.router.navigateByUrl('/listar-peliculas')); // Corregido: ruta consistente
       },
       error: (e) => {
         console.error('Error al agregar la película:', e);

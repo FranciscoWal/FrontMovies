@@ -7,26 +7,6 @@
 </head>
 <body>
 
-  <!-- MENÚ -->
-  <header class="header">
-    <div class="logo-content">
-      <i class='bx bx-movie'></i>
-      <a href="./index.html" class="logo">Noche de Peliculas</a>
-    </div>
-
-    <nav class="navbar">
-      <a href="./index.html" style="--i:1">Peliculas</a>
-      <a href="./agregar.html" style="--i:2">Agregar Pelicula</a>
-      <a href="./editar.html" style="--i:3">Editar Pelicula</a>
-    </nav>
-
-    <div class="social-media">
-      <a href="#" style="--i:1"><i class='bx bx-search'></i></a>
-      <a href="#" style="--i:2"><i class='bx bx-message'></i></a>
-      <a href="#" style="--i:3"><i class='bx bx-user'></i></a>
-    </div>
-  </header>
-
   <!-- LISTADO DINÁMICO DE PELÍCULAS -->
   <div class="cards-container">
     @if (peliculas.length <= 0) {
@@ -43,7 +23,6 @@
 
             <!-- INFORMACIÓN -->
             <div class="card-back">
-              <h4>ID: {{ pelicula._id }}</h4>
               <h3>{{ pelicula.nombre }}</h3>
               <p>{{ pelicula.descripcion }}</p>
               <p><strong>Género:</strong> {{ pelicula.genero }}</p>
